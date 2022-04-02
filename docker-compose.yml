@@ -1,0 +1,41 @@
+version: "3.8"
+services:
+    app:
+        build: .
+        container_name: ${PREFIX}-php-app
+        working_dir: /var/www/
+        env_file:
+            - ./.env
+        volumes:
+            - ./:/var/www
+        networks:
+            - pbm-app-network
+    db:
+        image: mysql:5.7
+        container_name: ${PREFIX}-mysql-db
+        ports:
+            - "${DB_PORT}:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+        env_file:
+            - ./.env
+        networks:
+            - pbm-app-network
+    nginx:
+        env_file:
+            - ./.env
+        image: nginx:alpine
+        container_name: ${PREFIX}-php-nginx
+        ports:
+            - ${PORT}:80
+        volumes:
+            - ./:/var/www
+            - ./nginx/conf.d/:/etc/nginx/conf.d/
+        networks:
+            - pbm-app-network
+networks:
+    pbm-app-network:
+        driver: bridge
